@@ -1,6 +1,6 @@
 /*
 
-bronnen:
+Sources:
 parts of the DHT sensor code:
 https://www.instructables.com/How-to-use-DHT-22-sensor-Arduino-Tutorial/ 24/09/2024
 Bluetooth code adapted from:
