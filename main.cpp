@@ -1,6 +1,6 @@
 /*
 
-Sources:
+bronnen:
 parts of the DHT sensor code:
 https://www.instructables.com/How-to-use-DHT-22-sensor-Arduino-Tutorial/ 24/09/2024
 Bluetooth code adapted from:
@@ -27,6 +27,7 @@ BLEServer *pServer = NULL;
 BLECharacteristic *pSensorCharacteristic1 = NULL;
 BLECharacteristic *pSensorCharacteristic2 = NULL;
 BLECharacteristic *pSensorCharacteristic3 = NULL;
+BLECharacteristic *pWritableCharacteristic1 = NULL;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
@@ -34,6 +35,7 @@ bool oldDeviceConnected = false;
 #define SENSOR_CHARACTERISTIC_UUID1 "19b10001-e8f2-537e-4f6c-d104768a1214"
 #define SENSOR_CHARACTERISTIC_UUID2 "34de371c-ca75-4151-b3af-2c2d74f01a0f"
 #define SENSOR_CHARACTERISTIC_UUID3 "4ebde681-8e95-4263-b9fb-7fc4030da492"
+#define WRITABLE_CHARACTERISTIC_UUID1 "081ff2b0-309b-4ade-aa8f-8611ebe0d8eb"
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -45,6 +47,19 @@ class MyServerCallbacks : public BLEServerCallbacks
     void onDisconnect(BLEServer *pServer)
     {
         deviceConnected = false;
+    }
+};
+
+class MyCallbacks : public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *pCharacteristic) {
+        std::string value = pCharacteristic->getValue();
+        if (value.length() > 0) {
+            Serial.println("Received data from web app:");
+            for (int i = 0; i < value.length(); i++) {
+                Serial.print(value[i]);
+            }
+            Serial.println();
+        }
     }
 };
 
@@ -112,11 +127,22 @@ void setup()
             BLECharacteristic::PROPERTY_WRITE |
             BLECharacteristic::PROPERTY_NOTIFY |
             BLECharacteristic::PROPERTY_INDICATE);
+    // 4 for receiving data from webapp
+    pWritableCharacteristic1 = pService->createCharacteristic(
+        WRITABLE_CHARACTERISTIC_UUID1,
+            BLECharacteristic::PROPERTY_READ |
+            BLECharacteristic::PROPERTY_WRITE |
+            BLECharacteristic::PROPERTY_NOTIFY |
+            BLECharacteristic::PROPERTY_INDICATE);
+
+    pWritableCharacteristic1->setCallbacks(new MyCallbacks());
+
     // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
     // Create a BLE Descriptor
     pSensorCharacteristic1->addDescriptor(new BLE2902());
     pSensorCharacteristic2->addDescriptor(new BLE2902());
     pSensorCharacteristic3->addDescriptor(new BLE2902());
+    pWritableCharacteristic1->addDescriptor(new BLE2902());
 
     // Start the service
     pService->start();

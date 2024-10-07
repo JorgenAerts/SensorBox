@@ -23,14 +23,18 @@
     <p>Humidity Value: <strong><span id="humidityValue">NaN</span></strong>%</p>
     <p>Last reading: <span id="humidityTimestamp"></span></p>
 
-    <p>Code adapted from :<a href="https://RandomNerdTutorials.com/esp32-web-bluetooth/">Read the full project here.</a></p>
+    <button id="sendTestMessage">Test Button</button>
+    <p>Click here to send a test message to the connected device</p>
+
+    <p>Code adapted from: <a href="https://RandomNerdTutorials.com/esp32-web-bluetooth/">Read the full project here.</a></p>
 
     <script>
         // DOM Elements
         const connectButton = document.getElementById('connectBleButton');
         const disconnectButton = document.getElementById('disconnectBleButton');
         const bleStateContainer = document.getElementById('bleState');
-        
+        const sendTestMessage = document.getElementById('sendTestMessage');
+
         const luminosityValue = document.getElementById('luminosityValue');
         const temperatureValue = document.getElementById('temperatureValue');
         const humidityValue = document.getElementById('humidityValue');
@@ -45,10 +49,11 @@
         const luminosityCharacteristicUuid = '19b10001-e8f2-537e-4f6c-d104768a1214';
         const temperatureCharacteristicUuid = '34de371c-ca75-4151-b3af-2c2d74f01a0f';
         const humidityCharacteristicUuid = '4ebde681-8e95-4263-b9fb-7fc4030da492';
+        const writableCharacteristicUuid = '081ff2b0-309b-4ade-aa8f-8611ebe0d8eb';
 
         // BLE variables
         let bleServer, bleService;
-        let luminosityCharacteristic, temperatureCharacteristic, humidityCharacteristic;
+        let luminosityCharacteristic, temperatureCharacteristic, humidityCharacteristic, writableCharacteristic;
 
         // Connect Button (search for BLE Devices only if BLE is available)
         connectButton.addEventListener('click', () => {
@@ -59,6 +64,18 @@
 
         // Disconnect Button
         disconnectButton.addEventListener('click', disconnectDevice);
+
+        // Send Test Message to the ESP32
+        sendTestMessage.addEventListener('click', () => {
+            if (writableCharacteristic) {
+                const message = 'Test meesage from Web App'; // Sample message
+                const encoder = new TextEncoder();
+                const encodedMessage = encoder.encode(message);
+                writableCharacteristic.writeValue(encodedMessage).then(() => {
+                    console.log("Test message sent to BLE device");
+                });
+            }
+        });
 
         // Check if BLE is available in your Browser
         function isWebBluetoothEnabled() {
@@ -94,12 +111,13 @@
                 return Promise.all([
                     service.getCharacteristic(luminosityCharacteristicUuid),
                     service.getCharacteristic(temperatureCharacteristicUuid),
-                    service.getCharacteristic(humidityCharacteristicUuid)
+                    service.getCharacteristic(humidityCharacteristicUuid),
+                    service.getCharacteristic(writableCharacteristicUuid)
                 ]);
             })
             .then(characteristics => {
-                [luminosityCharacteristic, temperatureCharacteristic, humidityCharacteristic] = characteristics;
-                
+                [luminosityCharacteristic, temperatureCharacteristic, humidityCharacteristic, writableCharacteristic] = characteristics;
+
                 // Enable notifications for all characteristics
                 luminosityCharacteristic.startNotifications().then(() => {
                     luminosityCharacteristic.addEventListener('characteristicvaluechanged', handleLuminosityChange);
@@ -165,3 +183,4 @@
     </script>
 </body>
 </html>
+
