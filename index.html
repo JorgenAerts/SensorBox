@@ -68,7 +68,7 @@
         // Send Test Message to the ESP32
         sendTestMessage.addEventListener('click', () => {
             if (writableCharacteristic) {
-                const message = 'Test meesage from Web App'; // Sample message
+                const message = 'Test message received from Web App'; 
                 const encoder = new TextEncoder();
                 const encodedMessage = encoder.encode(message);
                 writableCharacteristic.writeValue(encodedMessage).then(() => {
