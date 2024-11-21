@@ -4,3 +4,4 @@ It can be mounted on the wall. It monitors temperature, humidity and light inten
 It uses LED's to indicate if the reading is in the optimal range(green) or not(red).
 There is a testbutton to light up all leds for 2 seconds
 Readings can be seen in the serial monitor, on a webserver via http or on node red dashboard via MQTT
+It can receive updates over the air as well
