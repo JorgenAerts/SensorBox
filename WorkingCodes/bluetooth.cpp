@@ -54,7 +54,9 @@ class MyServerCallbacks : public BLEServerCallbacks
 };
 
 class MyCallbacks : public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {if (value == "1")
+    void onWrite(BLECharacteristic *pCharacteristic) {
+        std::string value = pCharacteristic->getValue();
+        if (value == "1")
         std::string value = pCharacteristic->getValue();
         if (value.length() > 0) {
             Serial.println("Received data from web app:");
