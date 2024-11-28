@@ -259,7 +259,7 @@ void readLdr()
     }
 }
 
-//  Reads the humidity and temeprature with 5 second intervals
+//  Reads the humidity and temeprature with 5 second intervals *
 void readDht()
 {
     unsigned long currentMillisDht = millis();
